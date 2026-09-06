@@ -1,288 +1,484 @@
 # AI Voice Booking Assistant
 
-An AI-powered voice booking assistant that enables users to schedule appointments through natural voice conversations. The system collects and validates booking details, checks appointment availability, creates Google Calendar events, stores appointment information in Supabase, and handles booking, cancellation, and rescheduling workflows through an automated voice interface.
+An AI-powered voice appointment booking system that allows customers to schedule, check, manage, and receive confirmation for appointments through natural voice conversations.
+
+The system uses **Twilio** for phone communication, **Vapi** for voice-agent orchestration, **OpenAI** for conversational intelligence, **Next.js** for backend APIs, **Google Calendar** for availability and appointment management, **Supabase PostgreSQL** for persistent booking data, and **n8n** for workflow automation.
 
 ## 🚀 Features
 
-- 🎙️ AI-powered voice conversations using Vapi
-- 📅 Google Calendar integration for appointment management
+- 📞 Phone-based appointment booking through Twilio
+- 🎙️ AI voice assistant powered by Vapi
+- 🤖 OpenAI-powered conversational intelligence
+- 🗣️ Natural-language appointment conversations
+- 📅 Google Calendar integration
 - 🔎 Real-time appointment availability checking
+- 📋 Appointment booking and management
+- ❌ Appointment cancellation
+- 🔄 Appointment rescheduling
 - 👤 Customer name and phone number collection
 - 🕐 Appointment date and time collection
-- 📋 Multiple appointment types
-- 📅 Appointment booking, cancellation, and rescheduling
-- 🔗 Webhook-based backend integration
-- 🗄️ Supabase PostgreSQL database for appointment persistence
-- ⚡ Next.js API routes for backend processing
-- 🔄 n8n-compatible automation workflows
-- 📩 Automated appointment notifications and reminders
-- 🧾 Conversation and booking history
-- 🔐 Input validation and booking error handling
-- 👤 Authentication and user account support
-- 📊 Booking analytics and monitoring
-- 🌐 Production deployment using Vercel
-- 🛡️ Secure environment-variable-based configuration
-- 🔍 Structured logging and workflow monitoring
+- 🏷️ Appointment type support
+- 🗄️ Supabase PostgreSQL database
+- 🔗 Vapi webhook integration
+- ⚡ Next.js API routes
+- 🔄 n8n workflow integration
+- 🛡️ Input validation and error handling
+- ❤️ Health-check API
+- 📊 Booking status and management UI
+- 🌐 Production deployment support with Vercel
+- 🔐 Environment-variable-based configuration
 
-## 🏗️ Architecture
+---
+
+# 🏗️ System Architecture
 
 ```text
-                         ┌─────────────────┐
-                         │      User       │
-                         │ Voice Conversation│
-                         └────────┬────────┘
-                                  │
-                                  ▼
-                         ┌─────────────────┐
-                         │ Vapi Voice      │
-                         │ Assistant       │
-                         └────────┬────────┘
-                                  │
-                         Collects booking data
-                                  │
-                    ┌─────────────┴─────────────┐
-                    │                           │
-                    ▼                           ▼
-             Customer Details            Appointment Details
-             • Name                      • Date
-             • Phone                     • Time
-                                         • Type
-                    │                           │
-                    └─────────────┬─────────────┘
-                                  │
-                                  ▼
-                         ┌─────────────────┐
-                         │ Vapi Tool Call  │
-                         └────────┬────────┘
-                                  │
-                                  ▼
-                         ┌─────────────────┐
-                         │ Next.js Webhook │
-                         │    /api/vapi    │
-                         └────────┬────────┘
-                                  │
-                                  ▼
-                         ┌─────────────────┐
-                         │ Booking API     │
-                         │ /api/bookings   │
-                         └────────┬────────┘
-                                  │
-                    ┌─────────────┼─────────────┐
-                    │             │             │
-                    ▼             ▼             ▼
-              Availability    Google        Supabase
-                Check         Calendar      PostgreSQL
-                    │             │             │
-                    └─────────────┼─────────────┘
-                                  │
-                                  ▼
-                         ┌─────────────────┐
-                         │ Booking Result  │
-                         └────────┬────────┘
-                                  │
-                    ┌─────────────┴─────────────┐
-                    │                           │
-                    ▼                           ▼
-             Database Update             Notification
-                                          / Reminder
-                    │                           │
-                    └─────────────┬─────────────┘
-                                  │
-                                  ▼
-                         ┌─────────────────┐
-                         │ Voice Response  │
-                         │ Confirmation /  │
-                         │ Error Handling  │
-                         └─────────────────┘
+                         CUSTOMER
+                            │
+                         📞 Call
+                            │
+                            ▼
+                         Twilio
+                            │
+                            ▼
+                           Vapi
+                            │
+                            ▼
+                         OpenAI
+                            │
+                    Natural Conversation
+                            │
+                    "Book 3 PM tomorrow"
+                            │
+                            ▼
+                ┌────────────────────────┐
+                │     NEXT.JS BACKEND    │
+                │                        │
+                │       API Routes       │
+                │            │           │
+                │   ┌────────┼────────┐  │
+                │   │        │        │  │
+                │   ▼        ▼        ▼  │
+                │ Calendar Supabase  Vapi│
+                │                    │   │
+                │                    ▼   │
+                │                   n8n  │
+                └──────────┬─────────────┘
+                           │
+                 ┌─────────┴─────────┐
+                 ▼                   ▼
+          Google Calendar        Supabase
+                 │                   │
+          Availability +          Booking
+             Booking               Data
+                 │                   │
+                 └─────────┬─────────┘
+                           │
+                           ▼
+                    Booking Result
+                           │
+                           ▼
+                       Vapi Voice
+                           │
+                           ▼
+                  📞 Customer Confirmation
 ```
 
-## 🛠️ Tech Stack
+---
 
-### Frontend
+# 🔄 Complete Booking Flow
+
+### 1. Customer Calls
+
+The customer calls the configured business phone number using Twilio.
+
+### 2. Voice Assistant
+
+The call is connected to the Vapi voice assistant.
+
+### 3. Natural Conversation
+
+Vapi uses OpenAI to understand the customer's request.
+
+For example:
+
+```text
+Customer:
+"I want to book an appointment tomorrow at 3 PM."
+
+AI Assistant:
+"Sure. May I have your name and phone number?"
+```
+
+### 4. Information Collection
+
+The assistant collects the required booking information:
+
+```text
+Customer Name
+Customer Phone
+Appointment Date
+Appointment Time
+Appointment Type
+```
+
+### 5. Vapi Tool Call
+
+Once the required information is collected and confirmed, Vapi sends the structured request to the Next.js backend.
+
+```text
+Vapi
+  │
+  ▼
+POST /api/vapi
+```
+
+### 6. Backend Processing
+
+The Next.js backend validates the request and determines the required operation.
+
+```text
+Vapi Webhook
+      │
+      ▼
+Validation
+      │
+      ▼
+Availability Check
+      │
+      ▼
+Google Calendar
+      │
+      ▼
+Supabase
+```
+
+### 7. Availability Check
+
+The system checks Google Calendar to determine whether the requested appointment slot is available.
+
+### 8. Appointment Creation
+
+If the requested time is available, the system creates an event in Google Calendar.
+
+### 9. Database Persistence
+
+The appointment information is stored in Supabase PostgreSQL.
+
+### 10. Automation
+
+n8n can process the resulting booking workflow for additional automation and integrations.
+
+### 11. Voice Confirmation
+
+The result is returned to Vapi, which communicates the final booking status to the customer.
+
+```text
+"Your appointment has been successfully booked for tomorrow at 3 PM."
+```
+
+---
+
+# 📅 Appointment Management
+
+The system supports the complete appointment lifecycle.
+
+```text
+                    APPOINTMENT SYSTEM
+                           │
+            ┌──────────────┼──────────────┐
+            │              │              │
+            ▼              ▼              ▼
+          BOOK          CHECK           MANAGE
+        APPOINTMENT   AVAILABILITY     APPOINTMENT
+            │              │              │
+            │              │       ┌──────┴──────┐
+            │              │       │             │
+            ▼              ▼       ▼             ▼
+        Google         Calendar   Cancel       Reschedule
+        Calendar         Check      │             │
+            │              │        │             │
+            └──────────────┴────────┴─────────────┘
+                           │
+                           ▼
+                        Supabase
+                           │
+                           ▼
+                    Booking Records
+```
+
+Supported operations include:
+
+- Create appointment
+- Check availability
+- Cancel appointment
+- Reschedule appointment
+- Store appointment information
+- Retrieve booking information
+- Update booking status
+
+---
+
+# 🛠️ Tech Stack
+
+## Frontend
 
 - Next.js
 - React
 - TypeScript
+- CSS
 
-### Backend
+## Backend
 
 - Next.js API Routes
 - REST APIs
 - Webhooks
 - Server-side business logic
 
-### AI / Voice
+## AI / Voice
 
 - Vapi
+- OpenAI
 - Conversational AI
+- Voice AI
 - Tool Calling
-- Voice-based workflow automation
 
-### Database
+## Telephony
+
+- Twilio
+
+## Database
 
 - Supabase
 - PostgreSQL
 
-### Integrations
+## Calendar
 
 - Google Calendar API
+
+## Automation
+
 - n8n
+
+## Deployment
+
 - Vercel
 
-### Development & Testing
+## Development
 
 - Git
 - GitHub
 - Postman
 - cURL
 
-## 📂 Project Structure
+---
+
+# 📂 Project Structure
 
 ```text
 ai-voice-booking-assistant/
 │
 ├── app/
 │   ├── api/
+│   │   │
 │   │   ├── bookings/
 │   │   │   └── route.ts
 │   │   │
-│   │   └── vapi/
+│   │   ├── availability/
+│   │   │   └── route.ts
+│   │   │
+│   │   ├── health/
+│   │   │   └── route.ts
+│   │   │
+│   │   ├── vapi/
+│   │   │   └── route.ts
+│   │   │
+│   │   └── n8n/
 │   │       └── route.ts
 │   │
 │   ├── page.tsx
-│   └── layout.tsx
+│   ├── layout.tsx
+│   └── globals.css
 │
 ├── components/
-│   └── ...
+│   ├── BookingForm.tsx
+│   ├── BookingList.tsx
+│   ├── Availability.tsx
+│   ├── Navbar.tsx
+│   └── StatusCard.tsx
 │
 ├── lib/
-│   └── ...
+│   ├── supabase.ts
+│   ├── calendar.ts
+│   ├── validation.ts
+│   └── utils.ts
 │
-├── public/
+├── types/
+│   └── booking.ts
+│
+├── supabase/
+│   └── schema.sql
 │
 ├── .env.local
+├── .env.example
 ├── package.json
-├── tsconfig.json
-├── next.config.ts
-└── README.md
+├── README.md
+└── ...
 ```
 
-## 🔄 Booking Workflow
+---
 
-### 1. Voice Interaction
+# 🔌 API Routes
 
-The user starts a conversation with the Vapi voice assistant and requests an appointment.
-
-### 2. Information Collection
-
-The assistant collects:
-
-- Customer name
-- Phone number
-- Appointment date
-- Appointment time
-- Appointment type
-
-### 3. Confirmation
-
-The assistant confirms the collected information with the user before proceeding.
-
-### 4. Availability Validation
-
-The system checks the requested date and time against the configured appointment schedule and Google Calendar availability.
-
-### 5. Tool Execution
-
-Vapi invokes the booking tool and sends the structured appointment request to the Next.js backend.
-
-### 6. Backend Validation
-
-The booking API validates the request and ensures all required fields and appointment information are valid.
-
-### 7. Calendar Management
-
-The system creates the appointment in Google Calendar.
-
-### 8. Database Persistence
-
-The appointment details are stored in Supabase PostgreSQL.
-
-### 9. Notifications
-
-The configured notification workflow handles appointment confirmations, reminders, and related communication.
-
-### 10. Voice Response
-
-The booking result is returned to Vapi, and the assistant communicates the result naturally to the user.
-
-## 🔁 Appointment Management
-
-The assistant supports multiple appointment operations:
-
-```text
-User Request
-     │
-     ▼
-Voice Assistant
-     │
-     ├── Book Appointment
-     │
-     ├── Check Availability
-     │
-     ├── Cancel Appointment
-     │
-     └── Reschedule Appointment
-             │
-             ▼
-        Booking API
-             │
-       ┌─────┴─────┐
-       ▼           ▼
- Google Calendar  Supabase
-       │           │
-       └─────┬─────┘
-             ▼
-       Operation Result
-             │
-             ▼
-      Voice Confirmation
-```
-
-## 🔗 API Endpoints
-
-### Booking API
+## Booking API
 
 ```http
 POST /api/bookings
 ```
 
-Creates and stores a new appointment.
+Handles appointment creation and booking-related operations.
 
-### Vapi Webhook
+---
+
+## Availability API
+
+```http
+GET /api/availability
+```
+
+Checks appointment availability using the configured calendar.
+
+---
+
+## Vapi Webhook
 
 ```http
 POST /api/vapi
 ```
 
-Receives tool calls and booking requests from the Vapi voice assistant.
+Receives requests and tool calls from the Vapi voice assistant.
 
-### Availability
+---
 
-The booking workflow validates appointment availability before creating an event.
+## n8n Webhook
 
-### Appointment Management
+```http
+POST /api/n8n
+```
 
-The backend supports appointment lifecycle operations including:
+Provides integration between the application and n8n automation workflows.
 
-- Create
-- Retrieve
-- Update
-- Cancel
-- Reschedule
+---
 
-## 🔐 Environment Variables
+## Health Check
 
-Create a `.env.local` file:
+```http
+GET /api/health
+```
+
+Used to verify that the backend service is running correctly.
+
+---
+
+# 🗄️ Database
+
+The application uses **Supabase PostgreSQL** to persist appointment information.
+
+Typical booking information includes:
+
+```text
+Booking
+│
+├── Customer Name
+├── Customer Phone
+├── Appointment Date
+├── Appointment Time
+├── Appointment Type
+├── Calendar Event ID
+├── Booking Status
+└── Timestamps
+```
+
+The database schema is maintained in:
+
+```text
+supabase/schema.sql
+```
+
+---
+
+# 📅 Google Calendar Integration
+
+Google Calendar is used for appointment scheduling and availability management.
+
+The integration supports:
+
+- Calendar availability checking
+- Appointment creation
+- Event identification
+- Appointment cancellation
+- Appointment rescheduling
+- Calendar synchronization with booking records
+
+The calendar event ID can be stored with the corresponding Supabase booking record to maintain a relationship between the application and Google Calendar.
+
+---
+
+# 🤖 Vapi + OpenAI Integration
+
+Vapi manages the voice conversation and tool execution.
+
+OpenAI provides the conversational intelligence used to understand customer requests and generate natural responses.
+
+```text
+Customer Voice
+      │
+      ▼
+    Twilio
+      │
+      ▼
+     Vapi
+      │
+      ▼
+    OpenAI
+      │
+      ▼
+Intent + Information
+      │
+      ▼
+  Tool Calling
+      │
+      ▼
+ Next.js APIs
+```
+
+This allows customers to interact with the booking system using natural language rather than traditional forms.
+
+---
+
+# 🔄 n8n Integration
+
+n8n is integrated into the system for workflow automation.
+
+```text
+Next.js
+   │
+   ▼
+n8n Webhook
+   │
+   ├── Notifications
+   ├── Automation
+   ├── External Integrations
+   └── Workflow Processing
+```
+
+This allows additional business workflows to be triggered after booking-related events.
+
+---
+
+# 🔐 Environment Variables
+
+Create a `.env.local` file containing the required credentials and configuration.
 
 ```env
 GOOGLE_CALENDAR_ID=
@@ -294,13 +490,28 @@ NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 
 NEXT_PUBLIC_APP_URL=
+
+VAPI_API_KEY=
+VAPI_ASSISTANT_ID=
+
+TWILIO_ACCOUNT_SID=
+TWILIO_AUTH_TOKEN=
+TWILIO_PHONE_NUMBER=
+
+OPENAI_API_KEY=
 ```
 
-Never commit `.env.local`, API keys, OAuth credentials, or other secrets to GitHub.
+> **Security:** Never commit `.env.local`, API keys, OAuth credentials, or other secrets to GitHub.
 
-## 🧪 Testing
+The `.env.example` file can be used as a template without exposing actual credentials.
 
-The booking endpoint can be tested independently using:
+---
+
+# 🧪 Testing
+
+The booking API can be tested independently using cURL, Postman, or other API clients.
+
+Example:
 
 ```bash
 curl -X POST http://localhost:3000/api/bookings \
@@ -309,111 +520,153 @@ curl -X POST http://localhost:3000/api/bookings \
   "customer_name": "Test User",
   "customer_phone": "9999999999",
   "appointment_date": "2026-09-03",
-  "appointment_time": "10:00",
+  "appointment_time": "15:00",
   "appointment_type": "General"
 }'
 ```
 
-The system can be tested across the complete booking lifecycle:
+## Testing Areas
 
-- Voice conversation
-- Required-field collection
+The application can be tested across the complete workflow:
+
+- API health check
+- Booking API
+- Availability API
+- Vapi webhook
+- n8n integration
 - Input validation
-- Availability checking
-- Vapi tool calling
-- Webhook execution
-- Google Calendar integration
-- Supabase persistence
-- Booking confirmation
-- Cancellation
-- Rescheduling
-- Notification workflows
-- Error handling
-
-## 📊 Evaluation & Observability
-
-The system includes monitoring and evaluation capabilities for critical booking workflows.
-
-### Evaluation Areas
-
-- Required-field collection accuracy
-- Voice-to-tool workflow reliability
-- Booking validation
-- Availability checking
+- Google Calendar availability
 - Calendar event creation
-- Database persistence
-- Cancellation and rescheduling reliability
-- Booking success/failure handling
-- API response latency
+- Supabase persistence
+- Booking cancellation
+- Booking rescheduling
+- Voice interaction
+- Error handling
+- End-to-end booking workflow
 
-### Observability
+---
 
-Structured logging and workflow monitoring can be used to track:
+# 🛡️ Validation & Error Handling
 
-- API requests
-- Webhook execution
-- Booking failures
-- Calendar API errors
-- Database errors
-- Voice-tool execution
-- Response latency
-- Workflow status
+The system validates booking requests before processing them.
 
-This makes it easier to identify failures and debug production booking workflows.
+Validation includes:
 
-## 🌐 Deployment
+- Required customer information
+- Valid phone number
+- Valid appointment date
+- Valid appointment time
+- Valid appointment type
+- Availability verification
+- Calendar operation status
+- Database operation status
 
-The application is designed for production deployment using Vercel.
+The system returns appropriate booking results when an operation succeeds or fails.
+
+Example:
 
 ```text
-User
- │
- ▼
-Vapi
- │
- ▼
-Vercel
- │
- ├── Next.js Application
- ├── API Routes
- └── Webhooks
-      │
-      ├── Google Calendar
-      │
-      ├── Supabase
-      │
-      └── n8n
+Available
+    │
+    ▼
+Create Calendar Event
+    │
+    ▼
+Save Booking
+    │
+    ▼
+Success
 ```
 
-Environment variables are configured through the deployment platform rather than being stored directly in the source code.
+or:
 
-## 🔒 Security
+```text
+Unavailable
+    │
+    ▼
+Suggest Another Time
+    │
+    ▼
+Customer Chooses New Slot
+```
 
-The application follows secure configuration practices including:
+---
 
-- Environment variables for secrets
-- Server-side API credentials
-- Input validation
-- Webhook validation
-- Controlled API access
-- Database-level persistence
-- Separation of client and server configuration
-- No credentials committed to source control
+# 📊 Observability
 
-## 📈 Project Highlights
+The system can monitor important application and booking operations through structured logging and status tracking.
 
-- Built an end-to-end **AI voice booking system**
-- Integrated **Vapi conversational AI** with backend tool calling
-- Developed **Next.js REST APIs and webhooks**
-- Integrated **Google Calendar** for real-time appointment management
-- Implemented **Supabase PostgreSQL** persistence
-- Added **availability checking, booking, cancellation, and rescheduling**
-- Automated notifications and workflow processing using **n8n**
-- Implemented validation and error-handling workflows
+Key areas include:
+
+- API requests
+- Vapi webhook requests
+- Calendar operations
+- Database operations
+- n8n workflow execution
+- Booking failures
+- Validation errors
+- Availability failures
+- Response latency
+- Health status
+
+This helps identify failures across the complete voice-to-booking pipeline.
+
+---
+
+# 🌐 Deployment
+
+The Next.js application is deployed using Vercel.
+
+Production architecture:
+
+```text
+                    PRODUCTION
+                        │
+                     Customer
+                        │
+                        ▼
+                     Twilio
+                        │
+                        ▼
+                      Vapi
+                        │
+                        ▼
+                     OpenAI
+                        │
+                        ▼
+                    Vercel
+                        │
+              ┌─────────┼─────────┐
+              │         │         │
+              ▼         ▼         ▼
+         Google      Supabase    n8n
+         Calendar    PostgreSQL  Automation
+```
+
+Environment variables are configured securely through the deployment environment.
+
+---
+
+# 📈 Project Highlights
+
+- Built an end-to-end **AI voice appointment booking platform**
+- Integrated **Twilio** for phone-based communication
+- Integrated **Vapi** for voice-agent orchestration
+- Integrated **OpenAI** for conversational intelligence
+- Developed backend APIs using **Next.js and TypeScript**
+- Implemented **Google Calendar availability and booking**
+- Implemented **Supabase PostgreSQL persistence**
+- Built **Vapi and n8n webhook integrations**
+- Implemented appointment **booking, cancellation, and rescheduling**
+- Added input validation and error handling
+- Added backend health monitoring
+- Built a booking management interface
 - Deployed the application using **Vercel**
-- Added monitoring, logging, and workflow observability
+- Designed the system for automated, production-oriented appointment workflows
 
-## 👩‍💻 Author
+---
+
+# 👩‍💻 Author
 
 **Pratiksha Chandanshiv**
 
